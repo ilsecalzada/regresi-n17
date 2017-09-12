@@ -1,0 +1,30 @@
+##############Practica 7 .EJERCICIO DE ESTIMACIÓN DE SIGMA^2#############
+
+
+x <- c(132,129,120,113.2,105,92,84,83.2,88.4,59,80,81.5,71,69.2)
+y <- c(46,48,51,52.1,54,52,59,58.7,61.6,64,61.4,54.6,58.8,58)
+  
+x2 <- x^2
+
+Sxy <-((sum(x*y))-((sum(x)*sum(y))/14))
+  
+Sxx <- (sum(x2)-(((sum(x))^2)/14))
+
+B1 <- Sxy/Sxx
+
+mediax <- mean(x)
+mediay <- mean(y)
+
+B0 <-mediay-B1*mediax
+
+B1
+B0
+
+yp <- B0+B1*x
+resid<-y-yp
+yp
+resid
+
+SSE <- sum(resid^2)
+
+cov <- SSE/(length(x)-2)
