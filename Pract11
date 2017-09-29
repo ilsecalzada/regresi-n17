@@ -1,0 +1,55 @@
+#############Ejercicio en clase###########
+#Se busca la relación de estatura (x) con longitud del salto (y)
+x <- c(170,172,173,174,174,175,176,177,180,180,180,180,180,181,181,182,182,182,182
+       ,184,184,185,186,188)
+
+y <- c(.84, 1.31, 1.42,1.03,1.07,1.08,1.04,1.8,1.45,1.60,1.61,2.13,2.15,.84,
+       1.43,.90,1.81,1.94,2.68,1.49, 
+       2.52, 3.00,1.87,3.08)
+
+#1) determine la ec de la recta de regresión estimada
+x2 <- x^2
+Sxy <-((sum(x*y))-((sum(x)*sum(y))/length(x)))
+Sxx <- (sum(x2)-(((sum(x))^2)/length(x)))
+B1 <- Sxy/Sxx
+mediax <- mean(x)
+mediay <- mean(y)
+B0 <-mediay-B1*mediax
+B1
+B0
+ec <- lm(y~x)  #lm función que genera B1 y B2
+summary (ec)
+ec$coefficients
+ec$coefficients[1] #Para dar los coeficientes de las betas
+ec$coefficients[-1]
+#2) Calcule una estimación opuntual del salto horizontal promedio cuando la estatura 
+#de la persona es de 182.
+estim <- B0+(B1*182)
+estim
+#3)Calcule los valores de los residuos de min cuadrado de las 4 observaciones con las cuales 
+#la estatura es de 182.
+res1<-.90-estim
+res2<-1.82-estim
+res3<-1.92-estim
+res4<-2.68-estim
+res1
+res2
+res3
+res4
+#¿Que proporcion de la variación observada en el salto horizontal es atribuida a la relacion
+#de regresión lineal simple?
+###  45 % es el resultado del summary (R-squared)
+
+
+plot(y~x, xlab="estatura", ylab="salto horizontal",xlim=c(160,190), ylim=c(.80,3.2))
+abline(ec,col="green")
+
+
+yp <- B0+B1*x
+resid<-y-yp
+SSE <- sum(resid^2)
+SSE
+SST<- (sum(resid^2))-(((sum(y))^2)/length(y))
+SST
+r2<-1-(SSE/SST)
+r2
