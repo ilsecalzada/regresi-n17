@@ -1,0 +1,25 @@
+######Ejercicio en clase
+
+x<-c(2.4,3.4,4.6,3.7,2.2,3.3,4.0,2.1)
+y<-c(1.33,2.12,1.80,1.65,2.00,1.76,2.11,1.63)
+x2 <- x^2
+Sxy <-((sum(x*y))-((sum(x)*sum(y))/length(x)))
+Sxx <- (sum(x2)-(((sum(x))^2)/length(x)))
+B1 <- Sxy/Sxx
+mediax <- mean(x)
+mediay <- mean(y)
+B0 <-mediay-B1*mediax
+B1
+B0
+yp <- B0+B1*x
+resid<-y-yp
+SSE <- sum(resid^2)
+SSE
+ym<-y/length(y)
+resid2 <-y-ym
+SST<- (sum(y^2))-(((sum(y))^2)/length(y))
+SST
+r2<-1-(SSE/SST)
+r2
+r<-sqrt(r2)
+r
