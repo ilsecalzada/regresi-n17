@@ -1,0 +1,67 @@
+#######EJERCICIO
+#Estaturas : 1.2, 1.23, 1.19, 1.32, 1.28, 1.22, 1.17, 1.29, 1.33, 1.15
+##Nivel económico 110, 130, 108, 167, 156, 115, 104, 138, 170,107
+#Queremos compbobar la hipótesis que entre mayor ingreso de la familia hay una mayor estatura de
+#lxs niñxs
+esta<-c(1.2, 1.23, 1.19, 1.32, 1.28, 1.22, 1.17, 1.29, 1.33, 1.15)
+eco<- c(110, 130, 108, 167, 156, 115, 104, 138, 170,107)
+mod1<-lm(esta~eco)
+
+#############Bondad de ajuste 
+#Con la bondad de ajuste verificamos la calidad del modelo al interpretar la variable dependiente
+#Para esto se utiliza la tabla anova(análisis de varianza: contiene sa suma de cuadrados media)
+anova(mod1)
+anova
+#En este caso la variabilidad explicada del modelo es 0.033022=SSM . se revisa la SSR= 0.0031
+#revisando los valores del summary el estadístico F es mayor a 1 y p-value <.05 con estas 
+#revisiones se puede mencionar que se rechaza la hipótesis nula de F=1 y se puede establecer 
+#un modelo.
+
+#Revisar R2=multiple 
+summary(mod1)
+#Alrededor del 91% de la variabilidad de la estatura es explicada por la recta ajustada.
+summary(mod1)$coefficients
+#esta= 0.9323+ 0.0023eco
+
+###############Análisis de los coeficientes 
+#B0 es .93 y B1 es .0023, si la variable ingreso incrementa en un peso, la estatura del niño
+#incrementa .0023
+
+#Diagnóstico del modelo 
+base1<-data.frame(eco,esta)
+base1$fitted.mod1 <-fitted(mod1) ##Valores ajustado
+base1$residuals.mod1 <-residuals(mod1) #residuos del modelo
+base1$rstudent.mod1<-rstudent(mod1) #residuos estudentizados
+
+##Estas variables se utilizan para comprobar los supuestos...
+####**Supuesto de normalidad...es que los residuos tengan una distribución normal para conocer 
+#la normalidad se utiliza la prueba de shapiro para analizar los residuos...
+shapiro.test(base1$rstudent.mod1)
+
+##Prueba de hipotesis Shapiro test (Estamos esperando que tenga una distribución normal):
+###**H0: la muestra tienen una distribución normal  (tiene que ser mayor a 0.05 el p-value)
+###**H1: la nuestra no tiene una distribución normal 
+
+##Tenemos un pvalue de .8172 no se rechaza la hipoesis nula por lo que se acepta que hay 
+##normalidad.
+
+##Ahora veremos este resultado en un gráfico
+x11() #Para abrir una interfaz gráfica 
+qqnorm(base1$rstudent.mod1, main="Normal (0,1)") #Se obtiene grafico de dispersión con la normal (0,1)
+qqline(base1$rstudent.mod1)
+
+#Ahora vamos a revisar la homogeneidad de varianzas
+##Para la homogeneidad se requiere de una libreria que se llama Intest, debido a que esta se 
+#tiene que aplicar la prueba de Breush
+install.packages("Intest")
+require(Intest)
+bptest(mod1)
+
+###En esta prueba esperamos que haya homogeneidad de la varianza para eso tenemos que tener un
+#p-value mayor a .05 por lo que para mod1 se puede decir que hay homogeneidad en la variable.
+
+#Prueba de autocorrelación o independencia en este caso se utiliza la prueba de Durbin Watson(1.5 a 2.5)...
+#Para esta prueba se utiliza
+dwtest (mod1, alternative ="two.sided" )
+#En este caso al igual que los demas se acepta hipotesis nula debido a que tenemos un p-value 
+#mayor a .05... esto quiere decir que no hay autocorrelación en los residuos
