@@ -1,0 +1,147 @@
+##########27 de Octubre de 2017
+#########################EJERCICIO CLASE
+#En un financiera se quiere evaluar a los corredores bolsa diferentes empresas,
+#la oferta y desempeño de cada corredor se evaluar en 6 áreas, empleando para cada una de las áreas
+#una escala de 0 a 5. Tres de las áreas evaluadads son ejecución en la operación, facilidad de 
+#uso y gama de ofertas. Un 5 es la mejor calificación en las diferentes áreas. En los sig datos
+#se presentan las puntuaciones obtenidas
+corredor<-c("wall st", "etrade1", "etrade2", "pre trade", "track", "water house", "brown",
+            "br America","merill lynch", "strogn funds")
+operacion <-c(3.7,3.4,2.5,4.8,4,3,2.7,1.7,2.2,1.4)
+uso<-c(4.5, 3,4,3.7,3.5,3,2.5,3.5,2.7,3.6)
+gama<-c(4.8, 4.2, 4, 3.4, 3.2, 4.6, 3.3, 3.1, 3, 2.5)
+califtotal<-c(4, 3.5, 3.5, 3.5, 3.5, 3.5, 3,3,2.5,2)
+#a) Determine la ecuación de reg estimada que se puede usar para predecir la calificación total 
+#segun las evaluaciones obtenidas
+#b)Emplee la prueba F para determinar la significancia global de la relación el nivel de 
+#significancia que se requiere es de 95% ¿Cúal es su conclusión?
+#c)Elimine cualquiera de las variables independientes que no sea significativa para la ec de 
+#regresión estimada ¿Cual es la ec de regresión estimada que recomienda? Compare las r2 de los 
+#modelos
+financiera<-data.frame(califtotal,operacion,uso,gama)
+mode<- lm (califtotal~operacion + uso + gama )
+summary(mode)
+
+#a)y=0.25482x1+0.13249x2+ 0.45852x3
+
+#b)
+anova(mode)
+#Se observa que la var indep operación se tiene un estadistico F de 29.17, lo que es un buen 
+#estadístico debido a que se esperan valores mayores a 1, para los p value se esperan <0.05 en
+#este caso cumple con un p-value <0.05, al igual que la variable gamatiene un estadistico F de 
+#13.8545 y los p-values <0.05 . La variable uso tiene un estadistico F mayor a 1 pero sus p-values
+#son mayores a 0.05 por lo tanto no resulta significativa en nuestro modelo.
+
+#c)
+financiera2<-data.frame(califtotal,operacion,gama)
+mode2<- lm (califtotal~operacion + gama )
+summary(mode2)
+
+#En el modelo con las tres variables independientes operacion, uso y gama,la r2 ajustada tiene un
+#valor de 0.82 , lo que implica que la recta de regresión explica en 82% la variabilidad del modelo.
+#En el segundo modelo con las variables de operación y gama, la r2 ajustada tiene un valor de 0.83,
+#lo que implica que la recta de regresión explica en 83% la variabilidad del modelo.
+
+names(mode2)
+financiera2$fitted.mode2 <-fitted (mode2)
+financiera2$residuals.mode2<-residuals(mode2)
+financiera2$rstudent.mode2<-rstudent(mode2)
+###########Normalidad
+shapiro.test(financiera2$rstudent.mode2)
+##En esta prueba esperraremos un pvalue mayor a .05 (es de 0.6121) lo que podriamos decir que se acepta
+#el modelo  supuesto de normalidad, además de shapiro test se debe observar graficamente esta prueba 
+#de las funciones de qqnorm que nos permite hacer un gráfico qq 
+qqnorm(financiera2$rstudent.mode2)
+qqline(financiera2$rstudent.mode2)
+
+#homocedasticidad u homogeneidad de varianzas 
+install.packages("lmtest")
+require(lmtest)
+bptest(mode2)
+#Se tiene un p-value de 0.1104
+#Si cumple con la homogeneidad
+
+
+##Supuesto de independencia o autocorrelación
+dwtest(mode2,alternative="two.sided")
+#esta prueba se evalua de dos formas, por un lado el valor de Durbin Watson tiene que estar entre 
+#1.5 y 2.5, además de este valor hay que observar  el pvalue que tiene que ser mayor a .05 para que 
+#cumpla con el supuesto de independencia de los residuos.
+
+###En este caso obtenemos un Durbin Watson de 2.48 y un p-value de 0.6228 por lo que podemos decir que 
+#cumple el supuesto de independencia y al cumplir las 3 pruebas formales podriamos decir que tenemos un
+#buen modelo y podriamos plantear la ecuación del modelo.
+
+######################################EJERCICIO
+#Plantear un MRM de mímino 4 variables independientes, a este modelo que planteen van a realizar lo 
+#siguiente:
+#a) Analizar la anova para conocer la bondad de ajuste 
+#2) A través de los coeficientes detectar las varaibles independientes no significativas 
+#3) Analizar la r2 para conocer la variabilidad del modelo 
+#4) En dado cado de que haya alguna var indep no significativas eliminarla y diagnosticar el modelo a 
+#a traves de las pruebas para los supuestos.
+
+
+#Se desea conocer la relación que afecte el gasto de alimentacion mensual
+#de una familia con el ingreso mensual, los componentes de la familia y el ahorro familiar 
+#conseguido 
+#Indep Gasto total
+#Depend Gasto en alimentos, ingreso mensual, integrantes de familia, ahorro mensual
+
+aliment<-c(5000, 6000, 2000, 3000, 1500, 5000, 6000, 3000, 6000, 3500)
+ingreso<-c(10000,45000,11000,12000,10500,10000,24000,6000,45000,5000)
+integrantes<-c(6, 9, 5, 6, 3, 6, 6, 3, 6, 5)
+Ahorro <-c(500, 2000, 1000, 500, 1000, 2000, 2000, 1800, 1500, 1000)
+
+gastot<-c(4000, 22000, 7000, 8000, 5500,2500,10000, 5900,23000,4500 )
+mes <-data.frame(aliment,ingreso,integrantes,Ahorro,gastot)
+modelo<- lm (gastot~aliment + ingreso + integrantes + Ahorro )
+summary(modelo)
+anova(modelo)
+
+#1) y 2)
+
+#Se observa que solo las var indep aliment e ingreso son significativas para el modelo ya que tienen un
+#estadístico F de 47.7106 y 97.5480 respectivamente asi como p-values menores a 0.05, las variables de 
+#ahorro e integrantes no son significativas ya que el estadistico F es menor a 1 y los p-values son
+#mayores 0.05
+
+#3) El modelo muestra una r2 de 0.9402 así que el modelo muestra  una variabilidad entre las variables
+#independientes del 94%
+
+#4) 
+mes1 <-data.frame(aliment,ingreso,gastot)
+modelo1<- lm (gastot~aliment + ingreso)
+summary(modelo1)
+anova(modelo1)
+
+names(modelo1)
+mes1$fitted.modelo1 <-fitted (modelo1)
+mes1$residuals.modelo1 <-residuals(modelo1)
+mes1$rstudent.modelo1 <-rstudent(modelo1)
+
+###########Normalidad
+shapiro.test(mes1$rstudent.modelo1)
+
+##En esta prueba tenemos un pvalue mayor a .05 (es de 0.8872) lo que podriamos decir que se acepta
+#el modelo  supuesto de normalidad, además de shapiro test se debe observar graficamente esta prueba 
+#de las funciones de qqnorm que nos permite hacer un gráfico qq 
+qqnorm(mes1$rstudent.modelo1 )
+qqline(mes1$rstudent.modelo1 )
+
+#homocedasticidad u homogeneidad de varianzas 
+install.packages("lmtest")
+require(lmtest)
+bptest(modelo1)
+#Se tiene un p-value de 0.2294
+#Si cumple con la homogeneidad
+
+
+##Supuesto de independencia o autocorrelación
+dwtest(modelo1,alternative="two.sided")
+#esta prueba se evalua de dos formas, por un lado el valor de Durbin Watson tiene que estar entre 
+#1.5 y 2.5, además de este valor hay que observar  el pvalue que tiene que ser mayor a .05 para que 
+#cumpla con el supuesto de independencia de los residuos.
+
+###En este caso obtenemos un Durbin Watson de 1.312 y un p-value de 0.3096 por lo que podemos decir que 
+#no cumple el supuesto de independencia y como no cumple con este ultimo supuesto, no es un buen modelo
