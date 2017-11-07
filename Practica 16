@@ -1,0 +1,103 @@
+######### 7 de Noviembre 
+####COMPARACIÓN DE MODELOS########
+#Pretendemos seleccionar el mejor subconjunto de predictores 
+#En este caso para la aplicaci+on de MRM tenemos 2 variables independientes (calidad y capacidad) por lo que 
+#se propone comparar 3 modelos con la finalidad de aplicar el principio de Parsimonía, conocer variables 
+#independientes innecesarias, evitar multicolinealidad, es decir, que se tienen muchas variables intentando 
+#explicar el modelo ante estas variables se pueden comparar tres modelos
+#1) precio ~ capacidad
+#2) precio~calidad 
+#3) precio ~calidad+capacidad
+
+
+#####################¿Cómo seleccionamos el mejor modelo?
+###Criterio de información de Akaike (AIC)
+#El problema de utilizar R2 para comparar modelos es en muchos casos al analizar nuevas variables al modelo,
+#esta medidad crece.
+#Si estamos decidiendo cual de todos los modelos ajusta mejor a los datos, el modelo con más predictores 
+#siempre será el mejor ajustando.
+#Para evitar esto se utiliza el AIC, una medida de ajuste que penaliza el modelo por tener más variables, 
+#viene definido por:
+#AIC=(n)(log(SRC/n))+2k
+#SCR=Suma de cuadrados residuales
+#n es el número de casos en el modelo
+#k número de variables independientes 
+#El criterio que se utiliza para el AIC es elegir el modelo que tenga el menor valor de AIC, es decir, 
+#esperamos un AIC más pequeño. EL AIC NOS VA A YUDAR A decidir sobre la comparación de los modelos.
+
+#El metodo más recomendado es el metodo de step by step 
+####Para R se utiliza la función step()
+
+#Adentro del metodo step by step  hay 3 modalidades
+#1) forward....parte del coeficiente B0 y de ahi va probando las varibles independientes para ver cual es la 
+#que más aporta al modelo
+#2) backward...R empieza con todas las variables indepediente y estudia si el AIC baja cuando hay cambios de
+#variables
+#3) both...empieza como el forward la diferencia es que se realizan test para conocer el predictor menos util
+#El metodo más recomendado es el backward porque tiene un efecto represeor que permite probar cuando una
+#variable tiene influencia solo si otra variable se mantiene constante vamos a calcular el modelo con las
+#2 variables independinetes 
+
+capa<- c(4330,5500, 5550, 4700, 5200, 5500, 4700, 5500, 5800, 5000)
+calidad<- c(2,3,4,3,4,4,4,5,5,5)
+precio<-c(190,219,249,249,250,340,289,395,439,525)
+moch<-data.frame(precio,capa,calidad)
+mod1<-lm(precio~capa+calidad)
+summary(mod1)
+
+
+#En los coeficientes osbervamos el estadistico T que solo tenemos significatica la variable calidad...
+#Tenemos un error estándar residual de 58.75 que es un error alto, tambien observamos la r ajustada (por RME)
+# que tenemos una r ajustada de .70, lo que expplica 70 por ciento de la variabilidad del modelo observamos 
+#que tenemos un estadistico F como un buen valor y p value menor a 0.05 que implica que este modelo es mejor 
+#que el modelo basico, ahora vamos a utilizar la función step() para ver si podemos mejorar el ajuste del modelo
+step(mod1,direction = "backward")
+
+###Aquí podemos ver que el metodo step analizo 2 modelos
+#1) precio~ capa+calidad con AIC =83. 76
+#2) precio~calidad con un AIC= 83.51 
+
+#######Ahora vamos a probar con el metodo both
+step(mod1,direction = "both")
+##Tenemos un resultado igual al de backward por la forma que se construye este método ahora con el método
+#de forward 
+
+step(mod1,direction = "forward")
+
+##n este solo muestra el modelo completo porque inicia hacinedo pruebas con el modelo nulo y solo deja el
+#modelo completo porque es el que mayor AIC muestra...
+
+###################EJERCICIO
+help(datasets)
+library(help ="datasets")
+require(datasets);data(swiss); ?swiss
+#Aplicar un modelo con la varible dependiente fertility a este modelo tienen que agregarle 3 variables indepen,
+#van a realizar una descripción de la función summary del modelo completo (var dep = indepl+indeo2+indep3) la base
+#de datos que van a usar es swiss una vez que hagan la descripcion del modelo completo aplicar el criterio
+#AIC para comparar los modelos posbiles de su modelo completo, ya que hayan elegido un modelo con base en el AIC
+#aplicarlo y describir la función summary de su mejor modelo segun AIC
+
+class(swiss)
+swiss
+mod2<-lm(Fertility~Education+Catholic+Infant.Mortality , data = swiss)
+summary(mod2)
+
+#En los coeficientes observamos el estadistico T tenemos significativa la variable Catholic e Infant.Mortality
+#Tenemos un error estándar residual de 7.505 que es un error bajo, Observamos la r ajustada que tenemos de 0.639,
+#lo que explica 64 por ciento de la variabilidad observamos que tenemos un estadistico F como un buen valor y 
+#p value menor a 0.05.
+
+step(mod2,direction = "backward")
+###Aquí podemos ver que el metodo step analizo 1 modelo
+#1)Fertility ~ Education + Catholic + Infant.Mortality con AIC= 193.29
+
+step(mod2,direction = "both")
+##Tenemos un resultado igual al de backward por la forma que se construye este método
+
+step(mod2,direction = "forward")
+##En este solo muestra el modelo completo porque inicia haciendo pruebas con el modelo nulo y solo deja el
+#modelo completo porque es el que mayor AIC muestra...
+
+
+##De acuerdo al análisi y los datos arrojafod , R nos recomienda usar l modelo completo ya que los demás modelos
+#arrojan un AIC mayor 
