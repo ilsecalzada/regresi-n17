@@ -1,0 +1,71 @@
+
+#########09 de Noviembre
+###Medición estandarizada de la fecundidad e indicadores socioeconomicos para cada una de as 47 
+#provincias francesas hablantes de Suiza alrededor de 1888
+require(stats)
+base<-data.frame(swiss)
+
+#Anális exploratorio
+names(base)
+pairs(base) #Grafíca las variables por pares 
+cor(base)
+
+###Propuesta Moelo de regresión simple con base en el aálisis exploratorio
+regresion1<-lm(Infant.Mortality ~ Fertility, data=base)
+
+###Modelo propuesto anteriormente 
+nulo<-lm(Fertility~1 ,data=base) #Modelo nulo: es más simple, solo es una variable con una constante.
+#Permite si es el mejor modelo y entonces las variables dependientes no tienen significancia.Para comparar
+#lo con los otros modelos ya con las variables independientes incluidas.
+summary(nulo)
+completo<-lm(Fertility~. , data = base)#El punto es como si pusieramos todas las variables independientes.
+#completo<-lm(Fertility~Education + Catholic + Infant.Mortality + Agriculture , data = base)
+step(nulo, scope=list(lower=nulo, upper=completo),direction = "forward")#funcion que permite calcular los AIC
+#primer se pone el modelo más simple "nulo", el scope:incorporar todas las posibilidades de modelo, va a 
+#evaluar desde el medelo nulo hasta el completo(que considera las 5 variables). 
+#Nos permite definir el mejor modelo respeto al AIC
+summary(completo)
+help(step)
+
+
+
+
+##############################################EJERCICIO
+#Datos de ahorro del ciclo de vida interpaíses
+#[,1]	 sr	 numeric	 aggregate personal savings
+#[,2]	 pop15	 numeric	 % of population under 15
+#[,3]	 pop75	 numeric	 % of population over 75
+#[,4]	 dpi	 numeric	 real per-capita disposable income
+#[,5]	 ddpi	 numeric	 % growth rate of dpi
+
+help(datasets)
+library(help="datasets")
+
+require(datasets);data(LifeCycleSavings); ?LifeCycleSavings 
+require(stats)
+base1<-data.frame(LifeCycleSavings)
+
+names(base1)
+pairs(base1)
+cor(base1)
+
+nulo<-lm(sr	~1 ,data=base1)
+summary(nulo)
+completo<-lm(sr~. , data = base1)
+step(nulo, scope=list(lower=nulo, upper=completo),direction = "forward")
+
+#El modelo de regresión es sobre ahorro del ciclo de vida interpaíses, con 5 variables.Consideramos como 
+#variable dependiente la variable sr que se refiere a los ahorros personales agregados numéricos
+#El mejor modelo considera  tres variables independientes: sr ~ pop15 + ddpi + pop75, considera a las 
+#variables pop15: que es la población de 15 años, ddpi: que es la tasa de crecimiento dpi y pop75: población
+#de más de 75 años. Teniendo un AIC de 136.45
+#Considerando la variable independiente sr, se obtuvo un modelo nulo con un AIC de 150.96 y un modelo 
+#completo con un AIC de 138.30.
+
+mode <-lm(sr ~ pop15 + ddpi + pop75, data=base1)
+summary(mode)
+
+#En los coeficientes del modelo eficiente osbervamos el estadistico T que solo tenemos significatica la variable ddpi
+#Tenemos un error estándar residual de 3.767 que es un error bajo, tambien observamos la r ajustada (por RMR)
+# que tenemos una r ajustada de .2933, lo que expplica 29 por ciento de la variabilidad del modelo observamos 
+#que tenemos un estadistico F como un buen valor y p value menor a 0.05 .
