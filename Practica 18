@@ -1,0 +1,99 @@
+#####################################10 de Noviembre
+require(stats)
+base<-data.frame(swiss)
+names(base)
+pairs(base) 
+cor(base)
+
+nulo<-lm(Fertility~1 ,data=base) 
+summary(nulo)
+completo<-lm(Fertility~. , data = base)
+step(nulo, scope=list(lower=nulo, upper=completo),direction = "forward")
+summary(completo)
+
+mod1<-lm(formula = Fertility ~ Education + Catholic + Infant.Mortality + 
+     Agriculture, data = base)
+#Con una r2 ajustada mayor al 70% se comnsidera una buen modelo.
+#Para analizar del summary,con la finalidad de observar aspectos básicos como la r cuadrada ajustada que
+#nos permite conocer la variabilidad explicada del modelo, los errores de residuos al standar  "a", la 
+#significancia de las variables del estadístico F y el p-value para ver el ajuste del modelo, el 
+#estadistico t nos dice si la variable es significativa es decir que esa variable tiene relación con la 
+#variable independiente.
+#La prueba de hipotesis que se aplica en el estudip F es:
+#H0: B0, B1, B2, ... BK=0
+#H1: al menos un Bj diferente de 0
+#Aquí esperamos rechazar la hipotesis nula, por lo que el valor p-value debe ser < .05 (Así se rechaza la 
+#nula y se acepta la alternativa) y además el estadístico F debe ser mayor a 1. 
+#Al parecer tenemos un buen modelo segun estos indicadores
+
+#H0: los errores se distribuyen normalmente 
+
+##############PRUEBAS FORMALES DE LOS SUPUESTOS....
+###Pruebas del MRM
+shapiro.test(rstudent(mod1))####Prueba de Shapiro para normalidad 
+#Aqui esperamos no rechazar la hip nula por lo que el valor de p-value debe ser mayor a .05, aquí observamos
+#un p-value de .48 por lo que podemos mencionar que no rechazamos la hip nula, es decir, los errores se
+#distribuyen normal
+require(lmtest)
+bptest(mod1)####Prueba Breusch que permite ver autocorrelacion 
+#aqui esperamos no rechazar la hipotesis nula es decir un p-value maypr a .05, este modelo nos permite saber 
+#que no hay más de dos varibbles que aporten lo mismo al modelo, en este caso tenemos un p-value .53, por lo
+#que no rechazamos la hipotesis nula que es lo que estabamos esperando o se puede decir que este modelo si 
+#cumple con el supuesto de autocorrelación.
+
+dwtest(mod1, alternative = "two.side") ###Prueba Durbin-Watson, de independencia
+#Esperamos un p-value > .05  o un valor DW entre 1.5 y 2.5 
+
+#La prueba  para h0: r2 Agri= 0 frente a H1: r2 Agri!= 0 es significatica ya que 0.0187 es menor que .05
+
+####################Interpretación de coeficientes
+#Agricultura...-0.1546...coeficiente
+#El modelo elegido estima que hay uns disminución de 0.15 en la tasa de fecundidad por cada aumento de 1 
+#por ciento de hombres involucrados en la agricultura manteniendo constantes las variables restantes.
+
+#Educación...-0.9802...coeficiente 
+#El modelo elegido estima que hay uns disminución de 0.98 en la tasa de fecundidad por cada aumento de 1 
+#por ciento de la eduación manteniendo constantes las variables restantes.
+
+#Catholic...0.1202...coeficiente
+#El modelo elegido estima que hay un incremento de 0.12 en la tasa de fecundidad por cada aumento de 1 
+#por ciento de la población catolica manteniendo constantes las variables restantes.
+
+#infant mortality...1.07....coeficiente
+#El modelo elegido estima que hay un incremento de 1.07 en la tasa de fecundidad por cada aumento de 1 
+#por ciento de mortalidad infantil manteniendo constantes las variables restantes.
+
+
+################Ejercicio 
+#Variable dependiente drivers
+base1<-data.frame(Seatbelts)
+View(base1)
+names(base1)
+##
+pairs(base1) 
+cor(base1)
+nulo<-lm(drivers~1 ,data=base1) 
+summary(nulo)
+completo<-lm(drivers~. , data = base1)
+step(nulo, scope=list(lower=nulo, upper=completo),direction = "forward")
+summary(completo)
+
+##El mejor modelo contemplo 5 variables 
+mod2<-lm(formula = drivers ~ DriversKilled + front + rear + law + VanKilled, 
+         data = base1)
+
+summary(mod2)
+
+#Se observa una R2 de 0.87 es decir una variabilidad del modelo de 87%
+
+##############PRUEBAS FORMALES DE LOS SUPUESTOS....
+shapiro.test(rstudent(mod2))####Prueba de Shapiro para normalidad 
+#p-value de 0.9973
+
+require(lmtest)
+bptest(mod2)####Prueba Breusch que permite ver autocorrelacion
+#No cumple con el modelo ya que se obtuvo un p-value de 0.0298 <.05 y tendria que ser mayor 
+
+dwtest(mod2, alternative = "two.side") ###Prueba Durbin-Watson, de independencia
+#DW=1.6008 p-value = 0.00276
+#No cumple con este modelo ya que el p-value = 0.00276 <0.05 y deberia ser mayor 
