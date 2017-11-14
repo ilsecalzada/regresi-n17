@@ -1,0 +1,62 @@
+#######Ejercicio de Tarea para el 14 de Noviembre de 2017 
+
+help(datasets)
+library(help="datasets")
+require(datasets);data(longley); ?longley       
+require(stats)
+base<-data.frame(longley)
+names(base)
+pairs(base) 
+cor(base)
+
+#Se consideraron como variable dependiente la variable "Population"
+nulo<-lm(Population~1 ,data=base) 
+summary(nulo)
+
+completo<-lm(Population~. , data = base)
+
+step(nulo, scope=list(lower=nulo, upper=completo),direction = "forward")
+
+mod1<-lm(formula = Population ~ Year + Armed.Forces + GNP + Unemployed + GNP.deflator, data = base)
+
+summary(mod1)
+
+#El mejor modelo obtenido se considero todas las variables 
+#El modelo presenta un error residual standard de 0.4264 así como una R2 cuadrada ajustada de 0.9962 
+#es decir una variabilidad del modelo de 99%. El modelo tiene 2 variables significativas, las cualess
+#son GNP, Unemployed. 
+
+##############################PRUEBAS FORMALES DE LOS SUPUESTOS....
+######################PRUEBAS DEL MRM
+
+####PRUEBA DE SHAPIRO PARA NORMALIDAD
+shapiro.test(rstudent(mod1))
+# el valor del p-value debe ser mayor a .05 , en este modelo observamos un p-value de .2932, 
+#concluimos que los errores se distribuyen normalmente , esta prueba se acepta
+
+## PRUEBA DE BREUSH PAGAN que permite ver autocorrelación
+install.packages("lmtest")
+require(lmtest)
+bptest(mod1) 
+#se espera un p-value mayor a .05 para no rechazar el supuesto, este modelo nos permite saber que 
+#no hay mas de dos variables que aporten lo mismo al modelo.
+# En este caso tenemos un p-value de .7372 por lo que este modelo si cumple el supuesto de 
+#autocorrelacion
+
+# PRUEBA DE INDEPENDENCIA, DURBIN WATSON
+dwtest (mod1, alternative = "two.sided") 
+#Se busca un p-value>.05 un valor de Durbin-Watson de entre 1.5 y 2.5, este modelo tiene un p-value=0.037
+#y un DW=1.5679, esto quiere decir que el supuesto si se acepta. 
+#Este modelo si cumple con el supuesto de autocorrelación 
+
+summary(mod1)
+
+###INTERPRETACIÓN DE COEFICIENTES
+
+# Unemployed .001638....coeficiente
+# El modelo elegido estima que hay un aumento de .001638 en la poblacion ante cada
+# aumento en 1% de desempleo , manteniendo constantes las variables restantes.
+
+#GNP .01234....coeficiente
+# El modelo elegido estima que hay un incremento de .01234 en la poblacion ante cada 
+# aumento de 1% de variable GNP manteniendo constantes las variables restantes.
