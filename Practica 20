@@ -1,0 +1,101 @@
+########################23 de Noviembre PREDICCIONES 
+
+tasa<-c(71,53,55,48,69,84,21,68,68)
+potasio<-c(388,258,292,205,449,331,114,580,622)
+zinc<-c(2414,10693,11682,12560,2464,2607,16205,2005,1825)
+
+estudio<-data.frame(tasa,potasio,zinc)
+pairs(estudio)
+cor(estudio)
+
+nulo<-lm(tasa~1,data=estudio)  
+completo<-lm(tasa~.,data=estudio) 
+
+################Limites para predecir
+limestudio<-seq(min(estudio$zinc),max(estudio$zinc),length=9)
+limestudio<-data.frame(limestudio)
+limestudio
+limestud<-predict.lm(completo,limestudio,interval="prediction",se.fit = TRUE,data=estudio)
+head(limestud$fit) #####Te generaron los límites
+####Para dibujar los límites...
+matplot(limestudio,limestud$fit, type="l")
+
+####Predicciones 
+predict(completo,data.frame(zinc=1000,potasio=40),interval = 'predict')###Obteniendo un valor cuando 
+#zinc tiene un valor y potasio otro especifico. Damos una estimación puntual con las variables 
+#independientes y nos va a dar un valor de y (variable independiente)
+
+#################OTRO EJEMPLO
+peso<-c(74,92,63,58,78,85,85,73,62,80,72,74)
+altura<-c(168,196,170,175,162,169,190,186,176,170,176,179)
+ritmo<-c(62,75,60,71,66,62,79,74,70,66,71,69)
+edad<-c(25,31,29,64,44,41,37,35,34,29,19,50)
+
+estudio<-data.frame(peso,altura,ritmo,edad)
+pairs(estudio)
+cor(estudio)
+
+nulo<-lm(ritmo~1,data=estudio)  
+completo<-lm(ritmo~.,data=estudio)
+
+################Limites para predecir
+limestudio1<-seq(min(estudio$peso),max(estudio$peso),length=12)
+limestudio2<-seq(min(estudio$altura),max(estudio$altura),length=12)
+limestudio3<-seq(min(estudio$edad),max(estudio$edad),length=12)
+limestudio<-data.frame(limestudio1,limestudio2,limestudio3)
+limestudio
+limestud<-predict.lm(completo,limestudio,interval="prediction",se.fit = TRUE,data=estudio)
+head(limestud$fit) #####Te generaron los límites
+####Para dibujar los límites...
+matplot(limestudio,limestud$fit, type="l")
+####Predicciones , ¿Que ritmo tendría la persona si tiene un peso=60, altura=190 y edad=61?
+predict(completo,data.frame(altura=190,peso=60,edad=61),interval = 'predict')
+#El ritmo de esa persona es 77.63583
+#fit: es el valor que te interesa, lwr:un valor menor aproximado, limite inferior, 
+#upr:limite superior 
+
+
+
+###Ejercicio
+cajas<-c(10,15,10,20,25,18,12,14,16,22,24,17,13,30,24)
+distancia<-c(10,25,40,18,22,31,26,34,29,37,20,25,27,23,33)
+tiempo<-c(24,27,29,31,25,33,26,28,31,39,33,30,25,42,40)
+
+#Tiempo la variable dependiente
+
+base<-data.frame(tiempo,cajas,distancia)
+pairs(base)
+cor(base)
+nulo<- lm(tiempo~1, data = base)
+completo<- lm (tiempo~., data = base)
+step (completo, scope = list(lower=nulo, upper=completo), direction = "forward")
+mod<- lm(tiempo~ cajas+distancia, data = base)
+summary(mod)
+###Pruebas del MRM
+shapiro.test(rstudent(mod))####Prueba de Shapiro para normalidad 
+#Los errores no se distribuyen normalmente ya que tenemos un p-value e 0.0001064, no se cumple
+#este supuesto 
+require(lmtest)
+bptest(mod)####Prueba Breusch que permite ver autocorrelacion 
+#aqui esperamos no rechazar la hipotesis nula es decir un p-value mayor a .05, y tenemos un p-value
+#de 0.2694 por lo tanto de si cumple este supuesto
+
+dwtest(mod, alternative = "two.side") ###Prueba Durbin-Watson, de independencia
+#Esperamos un p-value > .05  o un valor DW entre 1.5 y 2.5
+#Tenemos un p-value de 0.8593 y un DW=2.1574 por lo tanto si cumple este supuesto
+
+###No pasa normalidad por lo que hay que revisar
+######los outlier##
+install.packages("car")
+require(car)
+outlierTest(completo,cutoff=.05, n.max=5, order=T)
+inlfluencePlot(completo,id.n=5)
+#Indica que la  observación 5 tiene con problemas, ahora para confirmar los casos que tienen 
+#implicaciones en el modelo se aplica el gráfico de distancias de cook
+cmod<-cooks.distance(completo)
+#cook.distance indica la variable que tenga mayor distancia es la que tiene problemas
+install.packages("faraway")
+require(faraway)
+halfnorm(cmod, labs=etique)
+#Aqui esperariamos un dato mayor a 1 para comprobar que si es atípico el numero más alto es el 5
+#por lo que ahora una soluci+on es eliminarlo y volver a aplicar shapiro test 
